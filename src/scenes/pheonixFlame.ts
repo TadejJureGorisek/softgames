@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js";
+import * as PIXI from 'pixi.js';
 
 const MAX = 10;
 
@@ -6,16 +6,19 @@ export function startPheonixFlame(app: PIXI.Application) {
   const container = new PIXI.Container();
 
   const g = new PIXI.Graphics()
-    .circle(0, 0, 26).fill({ color: 0xffffff, alpha: 0.18 })
-    .circle(0, -18, 14).fill({ color: 0xffffff, alpha: 0.35 });
+    .circle(0, 0, 26)
+    .fill({ color: 0xffffff, alpha: 0.18 })
+    .circle(0, -18, 14)
+    .fill({ color: 0xffffff, alpha: 0.35 });
   const tex = app.renderer.generateTexture(g);
   g.destroy();
 
-  const pool: { s: PIXI.Sprite; life: number; vy: number; drift: number }[] = [];
+  const pool: { s: PIXI.Sprite; life: number; vy: number; drift: number }[] =
+    [];
   for (let i = 0; i < MAX; i++) {
     const s = new PIXI.Sprite(tex);
     s.anchor.set(0.5);
-    s.blendMode = "add";
+    s.blendMode = 'add';
     s.tint = 0xff3300; // red
     s.visible = false;
     container.addChild(s);
@@ -44,7 +47,7 @@ export function startPheonixFlame(app: PIXI.Application) {
     spawnTimer += dt;
     if (spawnTimer > 0.06) {
       spawnTimer = 0;
-      const dead = pool.find(p => p.life <= 0);
+      const dead = pool.find((p) => p.life <= 0);
       if (dead) spawn(dead);
     }
 

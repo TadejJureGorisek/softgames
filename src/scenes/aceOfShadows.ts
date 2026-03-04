@@ -53,7 +53,7 @@ export function startAceOfShadows() {
 }
 
 function moveCardBack(cards: PIXI.Sprite[]) {
-  if (currentCard === cards.length) currentCard = cards.length - 1
+  if (currentCard === cards.length) currentCard = cards.length - 1;
   const card = cards[currentCard];
 
   if (gsap.isTweening(card)) return;
@@ -80,7 +80,7 @@ function moveCardBack(cards: PIXI.Sprite[]) {
 }
 
 function moveNextCard(cards: PIXI.Sprite[]) {
-  if (currentCard === -1) currentCard = 0
+  if (currentCard === -1) currentCard = 0;
   const card = cards[currentCard];
   if (gsap.isTweening(card)) return;
 
