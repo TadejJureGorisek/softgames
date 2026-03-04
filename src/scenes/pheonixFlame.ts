@@ -1,56 +1,78 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
 
-type Particle = {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-};
+const MAX = 10;
 
 export function startPheonixFlame(app: PIXI.Application) {
   const container = new PIXI.Container();
-  container.x = -170;
-  container.y = -250;
 
-  const graphics = new PIXI.Graphics();
-  graphics.blendMode = 'add';
-  container.addChild(graphics);
+  const g = new PIXI.Graphics()
+    .circle(0, 0, 26).fill({ color: 0xffffff, alpha: 0.18 })
+    .circle(0, -18, 14).fill({ color: 0xffffff, alpha: 0.35 });
+  const tex = app.renderer.generateTexture(g);
+  g.destroy();
 
-  const MAX_PARTICLES = 10;
-  const particles: Particle[] = [];
-
-  const fireX = 500;
-  const fireY = 700;
-
-  function resetParticle(p: Particle) {
-    p.x = fireX + (Math.random() - 0.5) * 20;
-    p.y = fireY;
-    p.vx = (Math.random() - 0.5) * 1;
-    p.vy = -Math.random() * 3 - 0.1;
-    p.life = 50;
+  const pool: { s: PIXI.Sprite; life: number; vy: number; drift: number }[] = [];
+  for (let i = 0; i < MAX; i++) {
+    const s = new PIXI.Sprite(tex);
+    s.anchor.set(0.5);
+    s.blendMode = "add";
+    s.tint = 0xff3300; // red
+    s.visible = false;
+    container.addChild(s);
+    pool.push({ s, life: 0, vy: 0, drift: Math.random() * 6.28 });
   }
 
-  // Create particles once
-  for (let i = 0; i < MAX_PARTICLES; i++) {
-    const p: Particle = { x: 0, y: 0, vx: 0, vy: 0, life: 0 };
-    resetParticle(p);
-    particles.push(p);
+  const origin = { x: 400, y: 400 };
+
+  function spawn(p: (typeof pool)[number]) {
+    p.life = 1;
+    p.vy = -(80 + Math.random() * 80); // px/sec
+    p.drift = Math.random() * 6.28;
+
+    p.s.visible = true;
+    p.s.alpha = 0;
+    p.s.scale.set(0.5 + Math.random() * 0.6);
+    p.s.position.set(origin.x + (Math.random() - 0.5) * 18, origin.y);
   }
 
-  app.ticker.add(() => {
-    graphics.clear();
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life--;
-      if (p.life <= 0) {
-        resetParticle(p);
-      }
-      const alpha = p.life / 30;
-      graphics.circle(p.x, p.y, 6);
-      graphics.fill({ color: 0xff6600, alpha });
+  let spawnTimer = 0;
+
+  app.ticker.add((t) => {
+    const dt = t.deltaMS / 1000;
+
+    // spawn particles slowly
+    spawnTimer += dt;
+    if (spawnTimer > 0.06) {
+      spawnTimer = 0;
+      const dead = pool.find(p => p.life <= 0);
+      if (dead) spawn(dead);
+    }
+
+    for (const p of pool) {
+      if (p.life <= 0) continue;
+
+      // reduce life
+      p.life -= dt * 1.2;
+
+      // move upward
+      p.s.y += p.vy * dt;
+
+      // smooth sideways movement
+      p.drift += dt * 6;
+      p.s.x += Math.sin(p.drift) * 18 * dt;
+
+      // fade out
+      p.s.alpha = p.life;
+
+      // slowly grow
+      p.s.scale.x *= 1 + dt * 0.15;
+      p.s.scale.y *= 1 + dt * 0.15;
+
+      // slight rotation
+      p.s.rotation = Math.sin(p.drift) * 0.15;
+
+      // hide when dead
+      if (p.life <= 0) p.s.visible = false;
     }
   });
 

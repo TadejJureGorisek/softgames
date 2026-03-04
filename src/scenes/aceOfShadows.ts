@@ -25,7 +25,12 @@ export function startAceOfShadows() {
     card.anchor.set(0.5);
     card.width = 200;
     card.height = offsetY;
-    card.tint = Math.random() * 0xffffff;
+    let color = Math.floor(Math.random() * 0xffffff);
+
+    while (color === 0x89b2ff) {
+      color = Math.floor(Math.random() * 0xffffff);
+    }
+    card.tint = color;
     card.x =
       deckX +
       (Math.random() > 0.5
@@ -48,8 +53,10 @@ export function startAceOfShadows() {
 }
 
 function moveCardBack(cards: PIXI.Sprite[]) {
+  if (currentCard === cards.length) currentCard = cards.length - 1
   const card = cards[currentCard];
 
+  if (gsap.isTweening(card)) return;
   gsap.to(card, {
     duration: duration,
     ease: 'power1.inOut',
@@ -69,11 +76,13 @@ function moveCardBack(cards: PIXI.Sprite[]) {
     },
   });
   currentCard--;
-  if (currentCard === 0) resetting = false;
+  if (currentCard === -1) resetting = false;
 }
 
 function moveNextCard(cards: PIXI.Sprite[]) {
+  if (currentCard === -1) currentCard = 0
   const card = cards[currentCard];
+  if (gsap.isTweening(card)) return;
 
   gsap.to(card, {
     duration: duration,
@@ -90,5 +99,5 @@ function moveNextCard(cards: PIXI.Sprite[]) {
     },
   });
   currentCard++;
-  if (currentCard === deckSize - 1) resetting = true;
+  if (currentCard === deckSize) resetting = true;
 }

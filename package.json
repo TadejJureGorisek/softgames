@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
+    "start": "serve -s dist -l $PORT",
     "prettier-fix": "prettier --write ."
   },
   "dependencies": {
     "gsap": "^3.14.2",
-    "pixi.js": "^8.0.0"
+    "pixi.js": "^8.0.0",
+    "serve": "^14.2.6"
   },
   "devDependencies": {
     "prettier": "^3.8.1",
